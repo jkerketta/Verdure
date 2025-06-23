@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Leaf } from 'lucide-react';
@@ -27,10 +26,11 @@ const LoginPage = () => {
         description: "You've successfully logged in."
       });
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login failed:", error.message);
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error.message || "Please check your credentials and try again.",
         variant: "destructive"
       });
     } finally {
@@ -111,10 +111,9 @@ const LoginPage = () => {
 
         {/* Demo credentials */}
         <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Account</h3>
+          <h3 className="text-sm font-medium text-blue-900 mb-2">First time here?</h3>
           <p className="text-xs text-blue-700">
-            Email: demo@verdure.com<br />
-            Password: any password
+            Sign up for an account, or use the "Forgot Password" link if needed.
           </p>
         </div>
       </div>

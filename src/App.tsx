@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import PlantSwipePage from "./pages/PlantSwipePage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
+import CheckEmailPage from './pages/CheckEmailPage';
 import PlantDetailPage from "./pages/PlantDetailPage";
 import NotFound from "./pages/NotFound";
 
@@ -30,6 +30,7 @@ const App = () => (
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/check-email" element={<CheckEmailPage />} />
               <Route path="/" element={<Layout />}>
                 <Route index element={<HomePage />} />
                 <Route path="/browse" element={<BrowsePage />} />

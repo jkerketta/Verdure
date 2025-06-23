@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Leaf } from 'lucide-react';
@@ -13,7 +12,9 @@ const SignUpPage = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    city: '',
+    favoritePlantType: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,16 +49,32 @@ const SignUpPage = () => {
     setIsLoading(true);
 
     try {
-      await signup(formData.email, formData.password, formData.name);
-      toast({
-        title: "Welcome to Verdure!",
-        description: "Your account has been created successfully."
-      });
-      navigate('/');
-    } catch (error) {
+      const data = await signup(
+        formData.email,
+        formData.password,
+        formData.name,
+        formData.city,
+        formData.favoritePlantType
+      );
+
+      if (data?.session) {
+        // User is logged in immediately (email confirmation disabled)
+        toast({
+          title: "Welcome to Verdure!",
+          description: "Your account has been created successfully."
+        });
+        navigate('/');
+      } else if (data?.user) {
+        // Email confirmation is required
+        navigate('/check-email');
+      } else {
+        throw new Error("An unexpected error occurred during signup.");
+      }
+    } catch (error: any) {
+      console.error("Signup failed:", error.message);
       toast({
         title: "Signup failed",
-        description: "Please try again with different details.",
+        description: error.message || "Please try again with different details.",
         variant: "destructive"
       });
     } finally {
@@ -134,6 +151,32 @@ const SignUpPage = () => {
                 value={formData.confirmPassword}
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
                 placeholder="Confirm your password"
+                required
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                type="text"
+                value={formData.city}
+                onChange={(e) => handleChange('city', e.target.value)}
+                placeholder="Your city"
+                required
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="favoritePlantType">Favorite Plant Type</Label>
+              <Input
+                id="favoritePlantType"
+                type="text"
+                value={formData.favoritePlantType}
+                onChange={(e) => handleChange('favoritePlantType', e.target.value)}
+                placeholder="e.g. Succulent, Fern, Cactus"
                 required
                 className="w-full"
               />

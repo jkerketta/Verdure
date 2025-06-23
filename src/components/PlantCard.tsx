@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { MapPin, Sun, Droplets, DollarSign } from 'lucide-react';
 import { Plant } from '@/contexts/PlantContext';
@@ -38,10 +37,10 @@ const PlantCard: React.FC<PlantCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
       <div className="relative">
         <img
-          src={plant.image}
+          src={plant.image_url}
           alt={plant.name}
           className="w-full h-48 object-cover"
         />
@@ -50,39 +49,41 @@ const PlantCard: React.FC<PlantCardProps> = ({
         </div>
       </div>
       
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h3 className="font-semibold text-gray-900 text-lg">{plant.name}</h3>
-            <p className="text-sm text-gray-500 italic">{plant.species}</p>
+      <div className="p-4 flex flex-col flex-grow">
+        <div className="flex-grow">
+          <div className="flex items-start justify-between mb-2">
+            <div>
+              <h3 className="font-semibold text-gray-900 text-lg">{plant.name}</h3>
+              <p className="text-sm text-gray-500 italic">{plant.species}</p>
+            </div>
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+              {plant.size}
+            </span>
           </div>
-          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-            {plant.size}
-          </span>
-        </div>
-        
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-          {plant.description}
-        </p>
-        
-        <div className="flex items-center space-x-4 mb-3 text-sm text-gray-500">
-          <div className="flex items-center space-x-1">
-            {getLightIcon(plant.lightNeeds)}
-            <span className="capitalize">{plant.lightNeeds} light</span>
+          
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+            {plant.description}
+          </p>
+          
+          <div className="flex items-center space-x-4 mb-3 text-sm text-gray-500">
+            <div className="flex items-center space-x-1">
+              {getLightIcon(plant.light_needs)}
+              <span className="capitalize">{plant.light_needs} light</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              {getWaterIcon(plant.water_needs)}
+              <span className="capitalize">{plant.water_needs} water</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-1">
-            {getWaterIcon(plant.waterNeeds)}
-            <span className="capitalize">{plant.waterNeeds} water</span>
+          
+          <div className="flex items-center space-x-1 mb-4 text-sm text-gray-500">
+            <MapPin size={14} />
+            <span>{plant.location}</span>
           </div>
-        </div>
-        
-        <div className="flex items-center space-x-1 mb-4 text-sm text-gray-500">
-          <MapPin size={14} />
-          <span>{plant.location}</span>
         </div>
         
         {showActions ? (
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 mt-auto">
             <Button 
               variant="outline" 
               size="sm" 
@@ -100,7 +101,7 @@ const PlantCard: React.FC<PlantCardProps> = ({
             </Button>
           </div>
         ) : (
-          <Button asChild size="sm" className="w-full bg-green-600 hover:bg-green-700">
+          <Button asChild size="sm" className="w-full bg-green-600 hover:bg-green-700 mt-auto">
             <Link to={`/plant/${plant.id}`}>View Details</Link>
           </Button>
         )}

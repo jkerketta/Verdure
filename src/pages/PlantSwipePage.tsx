@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Heart, X, RotateCcw } from 'lucide-react';
 import { usePlants } from '@/contexts/PlantContext';
@@ -9,11 +8,11 @@ import { Link } from 'react-router-dom';
 
 const PlantSwipePage = () => {
   const { user } = useAuth();
-  const { getRecommendedPlants, likePlant, likedPlants } = usePlants();
+  const { plants, getRecommendedPlants, likePlant, likedPlants } = usePlants();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastAction, setLastAction] = useState<'like' | 'pass' | null>(null);
   
-  const recommendedPlants = getRecommendedPlants();
+  const recommendedPlants = getRecommendedPlants(user ? user.id : null);
   const currentPlant = recommendedPlants[currentIndex];
 
   if (!user) {

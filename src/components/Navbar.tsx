@@ -1,16 +1,21 @@
-
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Home, Search, Plus, Heart, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out."
+    });
     navigate('/');
   };
 
@@ -91,19 +96,50 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-green-100 px-4 py-2">
           <div className="flex justify-around">
-            {navItems.map(({ icon: Icon, path }) => (
-              <Link
-                key={path}
-                to={path}
-                className={`p-3 rounded-lg transition-colors ${
-                  location.pathname === path
-                    ? 'text-green-700 bg-green-50'
-                    : 'text-gray-600'
-                }`}
-              >
-                <Icon size={20} />
-              </Link>
-            ))}
+            {navItems.map(({ icon: Icon, path, label }) => {
+              if (label === 'Profile' && user) {
+                // Show dropdown for profile on mobile
+                return (
+                  <DropdownMenu key={path}>
+                    <DropdownMenuTrigger asChild>
+                      <button className={`p-3 rounded-lg transition-colors ${location.pathname === path ? 'text-green-700 bg-green-50' : 'text-gray-600'}`}>
+                        <Icon size={20} />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to="/profile">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                        <LogOut size={16} className="mr-2" /> Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              } else if (label === 'Profile') {
+                // If not logged in, show normal profile icon linking to login
+                return (
+                  <Link
+                    key={path}
+                    to="/login"
+                    className={`p-3 rounded-lg transition-colors ${location.pathname === path ? 'text-green-700 bg-green-50' : 'text-gray-600'}`}
+                  >
+                    <Icon size={20} />
+                  </Link>
+                );
+              }
+              // All other nav items
+              return (
+                <Link
+                  key={path}
+                  to={path}
+                  className={`p-3 rounded-lg transition-colors ${location.pathname === path ? 'text-green-700 bg-green-50' : 'text-gray-600'}`}
+                >
+                  <Icon size={20} />
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

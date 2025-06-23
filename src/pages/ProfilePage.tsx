@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Heart, Settings, MapPin } from 'lucide-react';
@@ -24,7 +23,7 @@ const ProfilePage = () => {
     );
   }
 
-  const userPlants = plants.filter(plant => plant.ownerId === user.id);
+  const userPlants = plants.filter(plant => plant.owner_id === user.id);
   const favoritePlants = plants.filter(plant => likedPlants.includes(plant.id));
 
   return (
@@ -39,7 +38,13 @@ const ProfilePage = () => {
           />
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-            <p className="text-gray-600 mb-4">{user.email}</p>
+            <p className="text-gray-600 mb-1">{user.email}</p>
+            {user.city && (
+              <p className="text-gray-500 mb-1">City: {user.city}</p>
+            )}
+            {user.favoritePlantType && (
+              <p className="text-gray-500 mb-1">Favorite Plant Type: {user.favoritePlantType}</p>
+            )}
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <div className="flex items-center space-x-1">
                 <span>{userPlants.length} listings</span>
@@ -50,10 +55,6 @@ const ProfilePage = () => {
               </div>
             </div>
           </div>
-          <Button variant="outline" size="sm">
-            <Settings size={16} className="mr-2" />
-            Edit Profile
-          </Button>
         </div>
       </div>
 
@@ -77,11 +78,9 @@ const ProfilePage = () => {
             <span>Browse</span>
           </Link>
         </Button>
-        <Button variant="outline" className="h-auto py-4">
-          <div className="flex flex-col items-center space-y-2">
-            <Settings size={24} />
-            <span>Settings</span>
-          </div>
+        <Button variant="outline" className="h-auto py-4 flex flex-col items-center space-y-2">
+          <Settings size={24} />
+          <span>Edit Profile</span>
         </Button>
       </div>
 

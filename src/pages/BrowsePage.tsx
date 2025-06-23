@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { usePlants } from '@/contexts/PlantContext';
@@ -11,70 +10,74 @@ const BrowsePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedLight, setSelectedLight] = useState<string>('');
+  const [selectedWater, setSelectedWater] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
 
   const filteredPlants = plants.filter(plant => {
-    const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         plant.species.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         plant.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSize = !selectedSize || plant.size === selectedSize;
-    const matchesLight = !selectedLight || plant.lightNeeds === selectedLight;
+    const matchesLight = !selectedLight || plant.light_needs === selectedLight;
+    const matchesWater = !selectedWater || plant.water_needs === selectedWater;
     const matchesPrice = !maxPrice || plant.price <= parseInt(maxPrice);
     
-    return matchesSearch && matchesSize && matchesLight && matchesPrice;
+    return matchesSearch && matchesSize && matchesLight && matchesWater && matchesPrice;
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-20 md:mb-0">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Browse Plants</h1>
-        <p className="text-gray-600">Find your next green companion</p>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <Input
-                placeholder="Search plants..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          <select
-            value={selectedSize}
-            onChange={(e) => setSelectedSize(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            <option value="">All Sizes</option>
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
-          </select>
-          
-          <select
-            value={selectedLight}
-            onChange={(e) => setSelectedLight(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            <option value="">All Light Needs</option>
-            <option value="low">Low Light</option>
-            <option value="medium">Medium Light</option>
-            <option value="high">High Light</option>
-          </select>
-          
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold mb-8 text-center text-green-800">Browse Our Plants</h1>
+      
+      <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
+        <div className="flex-grow">
           <Input
-            type="number"
-            placeholder="Max Price"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
+            type="text"
+            placeholder="Search by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
+        
+        <select
+          value={selectedSize}
+          onChange={(e) => setSelectedSize(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          <option value="">All Sizes</option>
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+        
+        <select
+          value={selectedLight}
+          onChange={(e) => setSelectedLight(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          <option value="">All Light Needs</option>
+          <option value="low">Low Light</option>
+          <option value="medium">Medium Light</option>
+          <option value="high">High Light</option>
+        </select>
+        
+        <select
+          value={selectedWater}
+          onChange={(e) => setSelectedWater(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          <option value="">All Water Needs</option>
+          <option value="low">Low Water</option>
+          <option value="medium">Medium Water</option>
+          <option value="high">High Water</option>
+        </select>
+        
+        <Input
+          type="number"
+          placeholder="Max Price"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+          className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
       </div>
 
       {/* Results */}

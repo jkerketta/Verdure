@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, MapPin } from 'lucide-react';
@@ -8,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabaseClient';
 
 const AddPlantPage = () => {
   const { user } = useAuth();
@@ -55,14 +55,32 @@ const AddPlantPage = () => {
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Show preview
       const reader = new FileReader();
       reader.onload = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+      const { data, error } = await supabase.storage.from('plant-images').upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+      if (error) {
+        console.error('Error uploading image:', error.message);
+        toast({ title: 'Image upload failed', description: error.message, variant: 'destructive' });
+        return;
+      }
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage.from('plant-images').getPublicUrl(fileName);
+      if (publicUrlData?.publicUrl) {
+        setImagePreview(publicUrlData.publicUrl);
+      }
     }
   };
 
@@ -80,24 +98,22 @@ const AddPlantPage = () => {
     setIsSubmitting(true);
     
     try {
-      // Generate tags based on form data
-      const autoTags = [];
-      if (formData.size === 'small') autoTags.push('compact');
-      if (formData.lightNeeds === 'low') autoTags.push('low-maintenance');
-      if (formData.waterNeeds === 'low') autoTags.push('drought-tolerant');
-      
       const plantData = {
-        ...formData,
+        name: formData.name,
+        species: formData.species,
+        description: formData.description,
         price: parseInt(formData.price),
-        image: imagePreview || 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop',
-        ownerId: user.id,
-        ownerName: user.name,
-        ownerAvatar: user.avatar,
-        tags: [...autoTags, 'indoor'],
-        isFeatured: Math.random() > 0.7 // 30% chance to be featured
+        size: formData.size,
+        light_needs: formData.lightNeeds,
+        water_needs: formData.waterNeeds,
+        location: formData.location,
+        delivery_options: formData.deliveryOptions,
+        tags: formData.tags.filter(tag => tag),
+        image_url: imagePreview || 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop',
+        is_featured: Math.random() > 0.7,
       };
       
-      addPlant(plantData);
+      await addPlant(plantData);
       
       toast({
         title: "Plant listed successfully!",
@@ -105,10 +121,11 @@ const AddPlantPage = () => {
       });
       
       navigate('/profile');
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error listing plant:", error);
       toast({
         title: "Error listing plant",
-        description: "Please try again",
+        description: error.message || "An unknown error occurred. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -204,6 +221,17 @@ const AddPlantPage = () => {
             placeholder="Tell potential adopters about your plant's history, care needs, and why you're rehoming it..."
             required
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="tags">Custom Tags</Label>
+          <Input
+            id="tags"
+            value={formData.tags.join(', ')}
+            onChange={(e) => handleInputChange('tags', e.target.value.split(',').map(tag => tag.trim()))}
+            placeholder="e.g., pet-friendly, air-purifying, rare"
+          />
+          <p className="text-xs text-gray-500">Separate tags with a comma.</p>
         </div>
 
         {/* Care Requirements */}

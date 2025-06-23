@@ -1,13 +1,14 @@
-
 import { Link } from 'react-router-dom';
 import { ArrowRight, Leaf, Heart, Search } from 'lucide-react';
 import { usePlants } from '@/contexts/PlantContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import PlantCard from '@/components/PlantCard';
 
 const HomePage = () => {
   const { plants } = usePlants();
-  const featuredPlants = plants.filter(plant => plant.isFeatured).slice(0, 3);
+  const { user } = useAuth();
+  const featuredPlants = plants.filter(plant => plant.is_featured).slice(0, 3);
 
   return (
     <div className="min-h-screen">
@@ -17,25 +18,40 @@ const HomePage = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Give Your Plants a
-              <span className="text-green-600 block">New Home</span>
+              {user ? (
+                <>
+                  Welcome back, <span className="text-green-600">{user.name}</span>!
+                </>
+              ) : (
+                <>
+                  Give Your Plants a <span className="text-green-600">New Home</span>
+                </>
+              )}
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Connect with fellow plant lovers. Find new green friends or rehome plants you can no longer care for.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild className="bg-green-600 hover:bg-green-700">
-                <Link to="/browse">
-                  <Search className="mr-2" size={20} />
-                  Browse Plants
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/swipe">
-                  <Heart className="mr-2" size={20} />
-                  Plant Swipe
-                </Link>
-              </Button>
+              {user ? (
+                <>
+                  <Button size="lg" asChild className="bg-green-600 hover:bg-green-700">
+                    <Link to="/browse">
+                      <Search className="mr-2" size={20} />
+                      Browse Plants
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <Link to="/swipe">
+                      <Heart className="mr-2" size={20} />
+                      Plant Swipe
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <Button size="lg" asChild className="bg-green-600 hover:bg-green-700">
+                  <Link to="/login">Join Now</Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -119,18 +135,24 @@ const HomePage = () => {
       <section className="py-20 bg-gradient-to-r from-green-600 to-emerald-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Start Your Plant Journey?
+            Explore the Community
           </h2>
           <p className="text-xl text-green-100 mb-8">
-            Join our community of plant lovers today
+            Find your next favorite plant or connect with other enthusiasts.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" asChild>
-              <Link to="/signup">Join Verdure</Link>
+              <Link to="/browse">Browse Plants</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="border-white text-white hover:bg-white hover:text-green-600">
-              <Link to="/add-plant">List a Plant</Link>
-            </Button>
+            {user ? (
+              <Button size="lg" variant="secondary" asChild>
+                <Link to="/profile">Go to Profile</Link>
+              </Button>
+            ) : (
+              <Button size="lg" variant="secondary" asChild>
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            )}
           </div>
         </div>
       </section>

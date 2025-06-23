@@ -1,18 +1,26 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface User {
   id: string;
   email: string;
   name: string;
+  city?: string;
+  favoritePlantType?: string;
   avatar?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  signup: (
+    email: string,
+    password: string,
+    name: string,
+    city: string,
+    favoritePlantType: string
+  ) => Promise<any>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -30,52 +38,116 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate checking for existing session
-    const savedUser = localStorage.getItem('verdure_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, location, favorite_plant_type, avatar_url')
+        .eq('id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+        throw error;
+      }
+      
+      if (data) {
+        const userProfile = {
+          id: data.id,
+          name: data.full_name,
+          email: data.email,
+          city: data.location,
+          favoritePlantType: data.favorite_plant_type,
+          avatar: data.avatar_url,
+        };
+        setUser(userProfile);
+      }
+    } catch (error: any) {
+      console.error("Error fetching profile:", error.message);
+      setUser(null);
     }
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    const getSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await fetchProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error("Error in getSession:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    getSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await fetchProfile(session.user.id);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockUser: User = {
-      id: '1',
-      email,
-      name: email.split('@')[0],
-      avatar: `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face`
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('verdure_user', JSON.stringify(mockUser));
-    setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error || !data.session) {
+        throw error || new Error('Login failed');
+      }
+      await fetchProfile(data.session.user.id);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const signup = async (email: string, password: string, name: string) => {
+  const signup = async (
+    email: string,
+    password: string,
+    name: string,
+    city: string,
+    favoritePlantType: string
+  ) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockUser: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      email,
-      name,
-      avatar: `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face`
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('verdure_user', JSON.stringify(mockUser));
-    setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+            location: city,
+            favorite_plant_type: favoritePlantType,
+            avatar_url: 'https://em-content.zobj.net/source/twitter/391/potted-plant_1fab4.png',
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // The onAuthStateChange listener will handle setting the user state.
+      // This function will return the session if email confirmation is disabled,
+      // and just the user if it's enabled. We'll use that in the UI.
+      return data;
+
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('verdure_user');
   };
 
   return (

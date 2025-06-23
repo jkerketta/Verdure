@@ -1,20 +1,70 @@
-
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Sun, Droplets, User, Heart, MessageCircle } from 'lucide-react';
-import { usePlants } from '@/contexts/PlantContext';
+import { ArrowLeft, MapPin, Sun, Droplets, Heart, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Plant, usePlants } from '@/contexts/PlantContext';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabaseClient';
+
+interface Profile {
+  id: string;
+  full_name: string;
+  avatar_url: string | null;
+}
 
 const PlantDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { plants, likedPlants, likePlant, unlikePlant } = usePlants();
+  const { likedPlants, likePlant, unlikePlant } = usePlants();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const plant = plants.find(p => p.id === id);
+
+  const [plant, setPlant] = useState<Plant | null>(null);
+  const [owner, setOwner] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPlantAndOwner = async () => {
+      if (!id) return;
+
+      setIsLoading(true);
+      // Fetch plant details
+      const { data: plantData, error: plantError } = await supabase
+        .from('plants')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (plantError || !plantData) {
+        toast({ title: "Error", description: "Plant not found.", variant: "destructive" });
+        navigate('/browse');
+        return;
+      }
+      setPlant(plantData);
+
+      // Fetch owner profile
+      const { data: ownerData, error: ownerError } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .eq('id', plantData.owner_id)
+        .single();
+      
+      if (ownerData) {
+        setOwner(ownerData);
+      }
+      
+      setIsLoading(false);
+    };
+
+    fetchPlantAndOwner();
+  }, [id, navigate]);
+
   const isLiked = plant ? likedPlants.includes(plant.id) : false;
-  const isOwner = user && plant && plant.ownerId === user.id;
+  const isOwner = user && plant && plant.owner_id === user.id;
+
+  if (isLoading) {
+    return <div className="text-center p-8">Loading plant details...</div>;
+  }
 
   if (!plant) {
     return (
@@ -40,34 +90,20 @@ const PlantDetailPage = () => {
 
     if (isLiked) {
       unlikePlant(plant.id);
-      toast({
-        title: "Removed from favorites",
-        description: `${plant.name} has been removed from your favorites`
-      });
+      toast({ title: "Removed from favorites", description: `${plant.name} has been removed from your favorites` });
     } else {
       likePlant(plant.id);
-      toast({
-        title: "Added to favorites",
-        description: `${plant.name} has been added to your favorites`
-      });
+      toast({ title: "Added to favorites", description: `${plant.name} has been added to your favorites` });
     }
   };
 
   const handleContact = () => {
     if (!user) {
-      toast({
-        title: "Login required",
-        description: "Please log in to contact plant owners",
-        variant: "destructive"
-      });
+      toast({ title: "Login required", description: "Please log in to contact plant owners", variant: "destructive" });
       navigate('/login');
       return;
     }
-
-    toast({
-      title: "Contact feature coming soon!",
-      description: "Messaging functionality will be available in a future update"
-    });
+    toast({ title: "Contact feature coming soon!", description: "Messaging functionality will be available in a future update" });
   };
 
   const getLightIcon = (level: string) => {
@@ -92,20 +128,15 @@ const PlantDetailPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 mb-20 md:mb-0">
-      {/* Back Button */}
       <Button variant="ghost" asChild className="mb-6">
-        <Link to="/browse">
-          <ArrowLeft className="mr-2" size={16} />
-          Back to Browse
-        </Link>
+        <Link to="/browse"><ArrowLeft className="mr-2" size={16} />Back to Browse</Link>
       </Button>
 
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Image */}
         <div className="space-y-4">
           <div className="relative rounded-2xl overflow-hidden">
             <img
-              src={plant.image}
+              src={plant.image_url}
               alt={plant.name}
               className="w-full h-96 lg:h-[500px] object-cover"
             />
@@ -115,7 +146,6 @@ const PlantDetailPage = () => {
           </div>
         </div>
 
-        {/* Details */}
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{plant.name}</h1>
@@ -125,31 +155,27 @@ const PlantDetailPage = () => {
                 {plant.size}
               </span>
               {plant.tags.map(tag => (
-                <span key={tag} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
-                  {tag}
-                </span>
+                <span key={tag} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">{tag}</span>
               ))}
             </div>
           </div>
 
           <p className="text-gray-700 leading-relaxed">{plant.description}</p>
 
-          {/* Care Requirements */}
           <div className="bg-green-50 rounded-xl p-4">
             <h3 className="font-semibold text-gray-900 mb-3">Care Requirements</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center space-x-2">
-                {getLightIcon(plant.lightNeeds)}
-                <span className="text-sm text-gray-700 capitalize">{plant.lightNeeds} Light</span>
+                {getLightIcon(plant.light_needs)}
+                <span className="text-sm text-gray-700 capitalize">{plant.light_needs} Light</span>
               </div>
               <div className="flex items-center space-x-2">
-                {getWaterIcon(plant.waterNeeds)}
-                <span className="text-sm text-gray-700 capitalize">{plant.waterNeeds} Water</span>
+                {getWaterIcon(plant.water_needs)}
+                <span className="text-sm text-gray-700 capitalize">{plant.water_needs} Water</span>
               </div>
             </div>
           </div>
 
-          {/* Location & Delivery */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2 text-gray-600">
               <MapPin size={18} />
@@ -158,7 +184,7 @@ const PlantDetailPage = () => {
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Delivery Options:</h4>
               <div className="flex flex-wrap gap-2">
-                {plant.deliveryOptions.map(option => (
+                {plant.delivery_options.map(option => (
                   <span key={option} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
                     {option.charAt(0).toUpperCase() + option.slice(1)}
                   </span>
@@ -167,48 +193,34 @@ const PlantDetailPage = () => {
             </div>
           </div>
 
-          {/* Owner Info */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center space-x-3">
-              <img
-                src={plant.ownerAvatar || `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face`}
-                alt={plant.ownerName}
-                className="w-12 h-12 rounded-full border-2 border-green-100"
-              />
-              <div>
-                <p className="font-medium text-gray-900">{plant.ownerName}</p>
-                <p className="text-sm text-gray-500">Plant parent</p>
+          {owner && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={owner.avatar_url || `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face`}
+                  alt={owner.full_name}
+                  className="w-12 h-12 rounded-full border-2 border-green-100"
+                />
+                <div>
+                  <p className="font-medium text-gray-900">{owner.full_name}</p>
+                  <p className="text-sm text-gray-500">Plant parent</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Action Buttons */}
           <div className="space-y-3">
             {!isOwner && (
               <>
-                <Button
-                  onClick={handleContact}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                  size="lg"
-                >
-                  <MessageCircle className="mr-2" size={20} />
-                  Contact Owner
+                <Button onClick={handleContact} className="w-full bg-green-600 hover:bg-green-700" size="lg">
+                  <MessageCircle className="mr-2" size={20} />Contact Owner
                 </Button>
-                <Button
-                  onClick={handleToggleLike}
-                  variant="outline"
-                  className="w-full"
-                  size="lg"
-                >
-                  <Heart 
-                    className={`mr-2 ${isLiked ? 'fill-current text-red-500' : ''}`} 
-                    size={20} 
-                  />
+                <Button onClick={handleToggleLike} variant="outline" className="w-full" size="lg">
+                  <Heart className={`mr-2 ${isLiked ? 'fill-current text-red-500' : ''}`} size={20} />
                   {isLiked ? 'Remove from Favorites' : 'Add to Favorites'}
                 </Button>
               </>
             )}
-            
             {isOwner && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-blue-800 text-sm font-medium">This is your listing</p>
