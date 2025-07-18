@@ -1,69 +1,43 @@
-# Welcome to your Lovable project
+# 🌿 Verdure App
 
-## Project info
+Welcome to **Verdure**, a modern, community-driven platform designed to help plant lovers connect, share, and discover new plants. Whether you're a seasoned botanist or just starting your plant journey, Verdure offers a welcoming space to learn, grow, and connect.
 
-**URL**: https://lovable.dev/projects/f34e3a91-e821-4705-9e65-257dcf59254e
+---
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+- **Browse Plants** – Discover a wide variety of plants with detailed information and images.
+- **Add Your Own Plants** – Share your favorite plants with the community.
+- **Plant Swiping** – Swipe through plant profiles to find your next favorite.
+- **Community & Profiles** – Connect with other plant enthusiasts, view profiles, and share experiences.
+- **Authentication** – Secure sign-up and login to protect your data.
+- **Responsive Design** – Seamless experience on both desktop and mobile.
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f34e3a91-e821-4705-9e65-257dcf59254e) and start prompting.
+## 🛠️ Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**: React (with TypeScript)
+- **Styling**: Tailwind CSS, custom CSS
+- **State Management**: React Context API
+- **Backend/Database**: Supabase (for authentication and data storage)
+- **Build Tool**: Vite
+- **Other**: Modern UI components, custom hooks
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
 
-Follow these steps:
+- Node.js (v16+ recommended)
+- npm or [bun](https://bun.sh/) installed
+- Supabase account (for backend credentials)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Installation
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. **Clone the repository:**
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/f34e3a91-e821-4705-9e65-257dcf59254e) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+```bash
+git clone https://github.com/your-username/verdure-app.git
+cd verdure-app
