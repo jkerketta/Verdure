@@ -31,13 +31,60 @@ Welcome to **Verdure**, a modern, community-driven platform designed to help pla
 ### Prerequisites
 
 - Node.js (v16+ recommended)
-- npm or [bun](https://bun.sh/) installed
+- npm or [bun](https://bun.sh/)
 - Supabase account (for backend credentials)
 
 ### Installation
 
 1. **Clone the repository:**
 
-```bash
-git clone https://github.com/your-username/verdure-app.git
-cd verdure-app
+    ```bash
+    git clone https://github.com/your-username/verdure-app.git
+    cd verdure-app
+    ```
+
+2. **Install dependencies:**
+
+    ```bash
+    npm install
+    # or
+    bun install
+    ```
+
+3. **Set up environment variables:**
+
+    Create a `.env` file in the root directory and add your Supabase credentials:
+
+    ```env
+    VITE_SUPABASE_URL=your-supabase-url
+    VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+    ```
+
+4. **Start the development server:**
+
+    ```bash
+    npm run dev
+    # or
+    bun run dev
+    ```
+
+    Then open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+If you have suggestions, bug reports, or want to add new features:
+
+1. Fork the repository  
+2. Create your feature branch:  
+   `git checkout -b feature/YourFeature`  
+3. Commit your changes:  
+   `git commit -m 'Add some feature'`  
+4. Push to the branch:  
+   `git push origin feature/YourFeature`  
+5. Open a pull request
+
+
